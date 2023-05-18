@@ -24,7 +24,7 @@ galleryEl.addEventListener('click', onGalleryClick)
   function onGalleryClick(event) {
     event.preventDefault();
   
-    const isImage = event.target.classList.contains("gallery__image");
+    const isImage = event.target.nodeName === "IMG";
     
     if(!isImage) {
       return;
@@ -35,31 +35,34 @@ galleryEl.addEventListener('click', onGalleryClick)
     const description = imgEl.alt;
 
     const modal = createModal(largeImageUrl, description);
-    modal.show();
-    closeModalOnEscape(modal);    
+    modal.show();  
   };
   
   function createModal(largeImageUrl, description) {
-    
     const modal = basicLightbox.create(`
       <div class="modal">
         <img src="${largeImageUrl}" alt="${description}" />
       </div>
-    `);
+    `,
+    {
+      onShow: (instance) => {
+        const largeImg = instance.element().querySelector('img');
+        largeImg.addEventListener("click", () => modal.close());
+        window.addEventListener("keydown", () => modal.close());
+      },
+      onClose: (instance) => {
+        const largeImg = instance.element().querySelector('img');
+        largeImg.removeEventListener("click", () => modal.close());
+        window.removeEventListener("keydown", () => modal.close());
+      },
+    });
   
     return modal;
   }
 
-  function closeModalOnEscape(modal) {
 
-    window.addEventListener("keydown", onEscapeClick)
+      
+   
 
-     function onEscapeClick(event) {
-        const isEscape = event.key === 'Escape';
 
-        if(isEscape) {
-            modal.close();
-            window.removeEventListener("keydown", onEscapeClick);
-        }
-     }   
-  }
+ 
